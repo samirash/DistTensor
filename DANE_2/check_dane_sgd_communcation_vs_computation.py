@@ -15,6 +15,8 @@ import math
 from distSGD import run_distSGD_ridgeregression_experiment_2 , distSGD_procedure
 
 
+# hellooooo we are editting this 1 2 3 , 1 2 3
+
 def run_DANE_ridgeregression_experiment_2(N, m, max_iter, flag, data, w_opt , mode , max_inner_iter , sampling_flag_rate , rate_param):
 
 	'''we give 0 for data and w_opt if we want to draw them fresh, but
