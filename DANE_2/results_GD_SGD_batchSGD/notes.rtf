@@ -1,0 +1,21 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1343\cocoasubrtf160
+{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+\margl1440\margr1440\vieww18460\viewh8400\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\f0\fs24 \cf0 GD:\
+- gets there with max 200 GD iterations and fix rate\
+- fix rate is better\
+\
+\
+SGD:\
+- fixed rate worked better\
+- sgd max iteration: 3000, 6000, 12000, 18000 and even more (not much improve with up to 60000)\
+- different fix rate\
+\
+\
+BATCH SGD:\
+- batch sgd max iteration: 800, 1600, 3200\
+- batch size: 100 (200 didn\'92t improve much)\
+- rate_params = [   [ 'inverse_t' , 1.0 ]  , [ 'inverse_t' , 1.5 ] ,  [ 'inverse_t' , 2.0  ]  ,  [ 'inverse_t' , 2.5]  ]  }
