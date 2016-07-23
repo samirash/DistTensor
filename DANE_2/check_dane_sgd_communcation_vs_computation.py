@@ -135,6 +135,15 @@ def ridgeregression_experiment_2_inner_iter( mode , max_inner_iter ):
 	# experiment_modes = [   [ 'linearEq_exact' , 0 ] ,  [ 'SGD' , T3 ]  , [ 'SGD' , T5 ] , [ 'SGD' , T7 ] ]# , [ 'SGD' , T3 ]    , [ 'SGD' , T4 ]  ,  [ 'SGD' , T5 ] ]
 	rate_params = [ [0,0], [ 'fix' , 0.01 ] ]#, [ 'fix' , 0.001 ] , [ 'fix' , 0.002 ] ]
 	rate_params = [[ 'inverse_t' , 0.15 ]  ]#, [ 'fix' , 0.001 ] , [ 'fix' , 0.002 ] ]
+
+	# mini batch:
+	rate_params = [[ 'fix' , 0.2 , 100]  ]#, [ 'fix' , 0.001 ] , [ 'fix' , 0.002 ] ]  # for mini_batch 
+	rate_params = [[ 'inverse_t' , 2.0  , 100]  ]#, [ 'fix' , 0.001 ] , [ 'fix' , 0.002 ] ]
+	experiment_modes = [   [ 'Batch_SGD' , T2/rate_params[0][2] ]  , [ 'Batch_SGD' , T3/rate_params[0][2] ] ,  [ 'Batch_SGD' , T4/rate_params[0][2] ]  , [ 'Batch_SGD' , T5/rate_params[0][2] ]]# , [ 'SGD' , T3 ]    , [ 'SGD' , T4 ]  ,  [ 'SGD' , T5 ] ]
+
+
+
+
 	# rate_params = [ [0,0], [ 'inverse_t' , 0.001 ] , [ 'inverse_t' , 0.01 ] , [ 'inverse_t' , 0.05 ], [ 'inverse_t' , 0.1 ] , [ 'inverse_t' , 0.5 ]  ]   #--> ino edame bede bebin badesh chi mishe!
 	# rate_params = [ [0,0], [ 'inverse_t' , 0.5 ] , [ 'inverse_t' , 0.7 ]   ]   #--> ino edame bede bebin badesh chi mishe!
 	# # rate_params = [ [ 'inverse_t_sqrt' , 0.5 ] , [ 'inverse_t_sqrt' , 1 ] , [ 'inverse_t_sqrt' , 4 ] ]
@@ -451,7 +460,7 @@ def ridgeregression_experiment_2_inner_iter( mode , max_inner_iter ):
 
 				ax = plt.subplot(111)
 				# ax.set_ylim([crop_point, 1.0])
-				ax.set_xlim([0.0, 20000.0])
+				ax.set_xlim([0.0, 30000.0])
 
 				# plt.plot(grad_counts[ 0: max_iter+1 , i*4 ] , all_suboptimalities[ 0: max_iter+1 , i*4 ], plot_colors[ 0 ] ,marker = 'o' ,  label='single_machine_total/m_data')
 				

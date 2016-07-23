@@ -181,6 +181,10 @@ def ridgeregression_experiment_2_inner_iter( mode , max_inner_iter ):
 	# experiment_modes = [   [ 'linearEq_exact' , 0 ] ,  [ 'SGD' , T3 ]  ]#, [ 'SGD' , T6 ] ]# , [ 'SGD' , T3 ]    , [ 'SGD' , T4 ]  ,  [ 'SGD' , T5 ] ]
 	rate_params = [ [0,0], [ 'fix' , 0.01 ] ]#, [ 'fix' , 0.001 ] , [ 'fix' , 0.002 ] ]
 	rate_params = [[ 'inverse_t' , 0.15 ]  ]#, [ 'fix' , 0.001 ] , [ 'fix' , 0.002 ] ]
+	
+	# mini batch:
+	rate_params = [ [ 'fix' , 0.2 , 100]  ]#, [ 'fix' , 0.001 ] , [ 'fix' , 0.002 ] ]  # for mini_batch 
+	experiment_modes = [   [ 'linearEq_exact' , 0 ] ,  [ 'Batch_SGD' , T3/rate_params[0][2] ]  , [ 'Batch_SGD' , T6/rate_params[0][2] ] ]# , [ 'SGD' , T3 ]    , [ 'SGD' , T4 ]  ,  [ 'SGD' , T5 ] ]
 	# rate_params = [ [0,0], [ 'inverse_t' , 0.001 ] , [ 'inverse_t' , 0.01 ] , [ 'inverse_t' , 0.05 ], [ 'inverse_t' , 0.1 ] , [ 'inverse_t' , 0.5 ]  ]   #--> ino edame bede bebin badesh chi mishe!
 	# rate_params = [ [0,0], [ 'inverse_t' , 0.5 ] , [ 'inverse_t' , 0.7 ]   ]   #--> ino edame bede bebin badesh chi mishe!
 	# # rate_params = [ [ 'inverse_t_sqrt' , 0.5 ] , [ 'inverse_t_sqrt' , 1 ] , [ 'inverse_t_sqrt' , 4 ] ]

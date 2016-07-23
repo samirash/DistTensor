@@ -69,9 +69,9 @@ def DANE_procedure(machines,  w_opt, objective_form, objective_param, max_iter, 
 		# computes all local gradients
 		for i in range(m):
 			a , b = machines[i].compute_local_grad_and_eval()
-			print 'checking the shape ...' , np.shape(a) , np.shape(b)
+			#print 'checking the shape ...' , np.shape(a) , np.shape(b)
 			local_gradients[:,i], local_evals[i] = machines[i].compute_local_grad_and_eval()
-			print local_evals[i], 'here dear!'
+			#print local_evals[i], 'here dear!'
 		
 
 	def compute_grad_global(local_gradients):
@@ -94,14 +94,9 @@ def DANE_procedure(machines,  w_opt, objective_form, objective_param, max_iter, 
 			print 'PERFORM LOCAL OPTIMIZATION (PROX) FOR       ..............    MACHINE NUMBER, ', i
 			temp , number_of_gradients = machines[i].dane_local_optimization(grad_global , mode , max_inner_iter , rate_param , dane_iter_number )
 			local_ws[:,i]  = np.reshape( temp , (-1,) )
-			print 'max_number_of_gradients ------>  ' , max_number_of_gradients
-			print 'total_number_of_gradients ------>  ' , total_number_of_gradients
 			max_number_of_gradients = max( max_number_of_gradients , number_of_gradients )
 			total_number_of_gradients = total_number_of_gradients + number_of_gradients 
-			
-		
-		print 'max_number_of_gradients' , max_number_of_gradients
-		print 'total_number_of_gradients ------>  ' , total_number_of_gradients
+
 		num_of_gradients_list.append( max_number_of_gradients )
 		num_of_gradients_list_2.append( total_number_of_gradients )
 
@@ -114,21 +109,21 @@ def DANE_procedure(machines,  w_opt, objective_form, objective_param, max_iter, 
 	def distribute_w_global(machines, w_global):
 		'''distributes w_global to all machines and sets their w to w_global '''
 		for i in range(m):
-			print i
+			#print i
 			machines[i].update_w_loc(w_global)
 			eval_machines_i = machines[i].compute_eval(w_global)
-			print '******     eval_machines_i ',  eval_machines_i
+			#print '******     eval_machines_i ',  eval_machines_i
 
 	def compute_eval_global( w_global ):
 		# taking means of local evaluations, or compute the evaluation on all data
 		# means of local evaluations:
-		print np.shape(local_evals)
+		#print np.shape(local_evals)
 		if np.shape(local_evals)[0] == 1:
 			eval_global = local_evals[0]
 		else:
 			eval_global = np.mean(local_evals,axis = 0)
 
-		print 'eval_global ', eval_global, ' hello'
+		#print 'eval_global ', eval_global, ' hello'
 		return eval_global
 
 
@@ -175,7 +170,7 @@ def DANE_procedure(machines,  w_opt, objective_form, objective_param, max_iter, 
 		runtimes.append( time.time() - start_time )
 
 		eval_diff = eval_pred - eval_global    # might want to remove this
-		print 'eval_diff, ', eval_diff
+		#print 'eval_diff, ', eval_diff
 		eval_pred = eval_global
 
 

@@ -67,10 +67,10 @@ class Computing_machine:
 		print self.full_machine_n
 		print N_sample
 		ind = random.sample( xrange( self.full_machine_n ), N_sample )
-		print np.shape(ind)
+		#print np.shape(ind)
 		ind_ = np.reshape(ind , (len(ind) , 1))
-		print np.shape(ind_)
-		print np.shape(self.full_machine_data)
+		#print np.shape(ind_)
+		#print np.shape(self.full_machine_data)
 		self.data = self.full_machine_data[ind , : ]
 		# np.array(np.reshape( ind , (len(ind) , 1)))
 		self.x = self.data[:,0:-1]
@@ -132,6 +132,12 @@ class Computing_machine:
 		return self.grad_local, eval_new
 
 
+	def compute_batch_local_grad(self):
+		batch_grad_new = self.objective.batch_grad(self.w_loc)
+		
+		return batch_grad_new
+
+
 	def dane_local_optimization(self, grad_global , mode , max_iter , rate_param , dane_iter_number ):
 		
 		# this way we do not really need grad_global to be passed here since the object has it after using 'update_grad_global_copy' function
@@ -143,7 +149,7 @@ class Computing_machine:
 		mu = self.opt_alg_param[0][1]
 
 		w_loc =self.w_loc
-		print 'shape of w_loc, ', np.shape(w_loc)
+		#print 'shape of w_loc, ', np.shape(w_loc)
 
 		if mu != 0:
 	
@@ -172,7 +178,7 @@ class Computing_machine:
 		print 'LOCAL OPTIMIZATON ------- SIMPLE MODE'
 	
 		w_loc =self.w_loc
-		print 'shape of w_loc, ', np.shape(w_loc)
+		#print 'shape of w_loc, ', np.shape(w_loc)
 	
 		w_new , number_of_gradients = self.objective.simple_optimize( mode , max_iter , w_loc , rate_param , dane_iter_number , initial_iter)
 

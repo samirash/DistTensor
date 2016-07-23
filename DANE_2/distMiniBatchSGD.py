@@ -14,11 +14,7 @@ import copy
 import math
 
 
-
-
-
-
-def run_distSGD_ridgeregression_exp_2(N, m, max_iter, flag, data, w_opt , mode , max_inner_iter , sampling_flag_rate , rate_param):
+def run_dist_minibatchSGD_ridgeregression_exp_2(N, m, max_iter, flag, data, w_opt , mode , max_inner_iter , sampling_flag_rate , rate_param):
 
 	'''we give 0 for data and w_opt if we want to draw them fresh, but
 	give them as input if we want to use the same ones and run on different number of machines or different iteration numbers'''
@@ -64,12 +60,11 @@ def run_distSGD_ridgeregression_exp_2(N, m, max_iter, flag, data, w_opt , mode ,
 		# main_opt_eval = mainrg.eval(w_opt)
 		# print 'first main_opt_eval, ', main_opt_eval
 
-
 	# I am calling initialize_machines to set up our computing machines:
 	machines = initialize_machines( m, data )
 
 	'''Running distSGD procedure:'''
-	evals, runtimes, w_ans , number_of_gradients , number_of_gradients_2 = distSGD_procedure( machines ,  w_opt, 'ridge_regression', objective_param , max_iter,  mode , max_inner_iter , sampling_flag_rate , rate_param )
+	evals, runtimes, w_ans , number_of_gradients , number_of_gradients_2 = dist_minibatchSGD_procedure( machines ,  w_opt, 'ridge_regression', objective_param , max_iter,  mode , max_inner_iter , sampling_flag_rate , rate_param )
 
 	return evals, runtimes, w_ans , w_opt, data , number_of_gradients , number_of_gradients_2
 
@@ -80,7 +75,12 @@ def run_distSGD_ridgeregression_exp_2(N, m, max_iter, flag, data, w_opt , mode ,
 
 
 
-def distSGD_procedure(machines,  w_opt, objective_form, objective_param, max_iter,  mode , max_inner_iter , sampling_flag_rate , rate_param ):  # check the experiments to see what \mu needs to be is it what I have in machines_setup function above?
+
+
+
+def dist_minibatchSGD_procedure(machines,  w_opt, objective_form, objective_param, max_iter,  mode , max_inner_iter , sampling_flag_rate , rate_param ):  # check the experiments to see what \mu needs to be is it what I have in machines_setup function above?
+
+	# maxiter is nt the mini_batch_SGD iters, it's the equil\valents to dane that we save here
 
 	# The main DANE procedure given the machines already with their data points
 	# if mu=0 does not converge then you shall use 0.3*lambda where the function is lambda-strong convex
@@ -90,7 +90,6 @@ def distSGD_procedure(machines,  w_opt, objective_form, objective_param, max_ite
 	# either [0] or [0, N_sample]
 
 	machines_setup( machines, w_opt, objective_form, objective_param, "dist_SGD") 
-
 
 	m = len(machines)
 	w_length = machines[0].w_length
@@ -154,24 +153,22 @@ def distSGD_procedure(machines,  w_opt, objective_form, objective_param, max_ite
 			machines[i].update_grad_global_copy(grad_global)
 
 	# this can become perfom_simple_local_optimizations
-	def perform_SGD_local_optimizations(machines, grad_global , mode , max_inner_iter , rate_param , dane_iter_number  , initial_iter):
+	def perform_batch_SGD_local_optimizations(machines, grad_global , mode , max_inner_iter , rate_param , dane_iter_number  , initial_iter ):
 		''' test!: # we do not actually need to pass this grad_global here, but is it better to use this and totally remove distribute_grad_global ?'''
 		# computes all local optimims which are essentially local w's
 		max_number_of_gradients = 0
 		total_number_of_gradients = 0
 		for i in range(m):
-			#print 'PERFORM LOCAL OPTIMIZATION (simple optimize -- SGD ) FOR       ..............    MACHINE NUMBER, ', i
+			#print 'PERFORM LOCAL OPTIMIZATION (simple optimize -- minibatch SGD ) FOR       ..............    MACHINE NUMBER, ', i
 			# here I am using SGD for the mode since I am just adding the simple distributed optimization with distributed SGD,
 			# but can be extended to other approaches and the I should pass mode here!
-			temp , number_of_gradients = machines[i].simple_local_optimization(grad_global , 'SGD' , max_inner_iter , rate_param , dane_iter_number , initial_iter )
+			temp , number_of_gradients = machines[i].simple_local_optimization(grad_global , 'Batch_SGD' , max_inner_iter , rate_param , dane_iter_number , initial_iter )
 			local_ws[:,i]  = np.reshape( temp , (-1,) )
 			max_number_of_gradients = max( max_number_of_gradients , number_of_gradients )
 			total_number_of_gradients = total_number_of_gradients + number_of_gradients 
 			
-		
 		num_of_gradients_list.append( max_number_of_gradients )
 		num_of_gradients_list_2.append( total_number_of_gradients )
-
 
 
 
@@ -209,39 +206,62 @@ def distSGD_procedure(machines,  w_opt, objective_form, objective_param, max_ite
 
 	initial_iter = 0
 
+	batch_num_of_gradients_list = []
+	batch_num_of_gradients_list_2 = []
+	batch_num_of_gradients_list.append( 0 )
+	batch_num_of_gradients_list_2.append( 0 )
+
 
 	for t in range(max_iter):
 
-		#	print eval_diff
 
-		# if eval_diff < 0.000000000001:
-		# 	print 'small difference'
-		# 	return evals, w_global, eval_diffs, suboptimalities
-
-		# pre step for sampling data if it the flag is on
-		print 'MAIN distSGD ITERATION   ...............................   NUMBER  ', t
-		if sampling_flag == 1:
-			sample_data_locally( machines , N_sample )
-		# step 1
-		compute_local_gradients( machines )
-		# step 2
-		grad_global = compute_grad_global( local_gradients )
-
-		# evaluation for current iteration
-		eval_global = compute_eval_global( w_global )
-		evals[t] = eval_global
+		batch_sgd_main_num_grads = 0
+		batch_sgd_main_num_grads_2 = 0
 
 
-		# step 3
-		distribute_grad_global( machines, grad_global )
-		# step 4
-		perform_SGD_local_optimizations( machines, grad_global , mode , max_inner_iter , rate_param , t+1 , initial_iter)
-		initial_iter = initial_iter + max_inner_iter
-		# step 5
-		w_global = compute_w_global( local_ws )
-		# step 6
-		distribute_w_global( machines, w_global )
 
+		for t2 in range(int(max_inner_iter)):
+
+			#	print eval_diff
+
+			# if eval_diff < 0.000000000001:
+			# 	print 'small difference'
+			# 	return evals, w_global, eval_diffs, suboptimalities
+
+			# pre step for sampling data if it the flag is on
+			#print 'MAIN distSGD ITERATION   ...............................   NUMBER  ', t
+			if sampling_flag == 1:
+				sample_data_locally( machines , N_sample )
+			# step 1
+			compute_local_gradients( machines )
+			# step 2
+			grad_global = compute_grad_global( local_gradients )
+
+			# evaluation for current iteration
+			eval_global = compute_eval_global( w_global )
+
+			if t2 ==0:
+				evals[t] = eval_global
+
+			# step 3
+			distribute_grad_global( machines, grad_global )
+			# step 4
+			# I am setting max_iter to 1 because I only want to get 1 step of mini-batch sgd and will do the remaining needed ones in this loop for t2, since it essentially is max_inner_iters/B*m, so the total number of gradients calculated for each t equal to the same as calculated in each dane step (max_inner_iter/m)
+			perform_batch_SGD_local_optimizations( machines, grad_global , mode , 1 , rate_param , t+1 , initial_iter)
+
+			batch_sgd_main_num_grads = batch_sgd_main_num_grads + num_of_gradients_list[t*int(max_inner_iter) + t2 +1]
+			batch_sgd_main_num_grads_2 = batch_sgd_main_num_grads_2 + num_of_gradients_list_2[t * int(max_inner_iter) + t2 +1]
+
+
+			initial_iter = initial_iter + 1
+			# step 5
+			w_global = compute_w_global( local_ws )
+			# step 6
+			distribute_w_global( machines, w_global )
+
+
+		batch_num_of_gradients_list.append( batch_sgd_main_num_grads )
+		batch_num_of_gradients_list_2.append( batch_sgd_main_num_grads_2 )
 
 		runtimes.append( time.time() - start_time )
 
@@ -249,13 +269,14 @@ def distSGD_procedure(machines,  w_opt, objective_form, objective_param, max_ite
 		#print 'eval_diff, ', eval_diff
 		eval_pred = eval_global
 
-
 	# evaluation for current iteration
 	eval_global = compute_eval_global( w_global )
 	evals[t+1] = eval_global
 
+	return evals, runtimes, w_global, batch_num_of_gradients_list, batch_num_of_gradients_list_2
 
-	return evals, runtimes, w_global , num_of_gradients_list , num_of_gradients_list_2
+	#return evals, runtimes, w_global , num_of_gradients_list , num_of_gradients_list_2
+
 
 
 
